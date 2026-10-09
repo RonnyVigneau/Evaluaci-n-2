@@ -1,0 +1,19 @@
+body {
+    text-align: center;
+    padding: 0px 40px;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.card {
+    background: black;
+    color: white;
+}
+
+img {
+    width: 18rem;
+}
