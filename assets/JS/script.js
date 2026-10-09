@@ -30,9 +30,6 @@ async function renderCards() {
         const types = card.types ? card.types.join(", ") : "Desconocido";
         const setEdition = card.setName || "Edición desconocida";
 
-        // Como ya filtramos antes, todas tendrán imagen asegurada
-        const imageUrl = `<img src="${card.imageUrl}" alt="${cardName}" class="card-image">`;
-
         template += `
         <div class="card" style="width: 18rem;">
             <img src="${card.imageUrl}" class="${cardName}" alt="${cardName}">
@@ -47,15 +44,6 @@ async function renderCards() {
             <a href="#" class="btn btn-primary">Go somewhere</a>
         </div>
 </div>
-           
-                
-                
-                    
-                    
-                    
-                   
-                
-            
         `;
     });
 
