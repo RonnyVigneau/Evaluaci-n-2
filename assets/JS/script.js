@@ -1,53 +1,91 @@
-const cardsSection = document.querySelector(".cards");
-const apiURL = "https://api.magicthegathering.io/v1/cards";
+const select = document.querySelector(".form-select");
+const cardsection = document.querySelector(".cards");
+let allCards = [];
 
-async function getCards() {
+function GetCategory(cards, category) {
+    if (category === "All") return cards;
+    return cards.filter(card => card.type?.includes(category));
+}
+
+function RenderCards(cards) {
+    cardsection.replaceChildren();
+
+    GetCategory(cards, select.value).forEach(card => {
+        const cardElement = document.createElement("article");
+        cardElement.className = "card";
+        cardElement.style.width = "18rem";
+
+        if (card.imageUrl) {
+            const image = document.createElement("img");
+            image.src = card.imageUrl;
+            image.alt = card.name ?? "Magic: The Gathering card";
+            cardElement.append(image);
+        }
+
+        const body = document.createElement("div");
+        body.className = "card-body";
+
+        const title = document.createElement("h5");
+        title.className = "card-title";
+        title.textContent = card.name ?? "Unknown card";
+        body.append(title);
+
+        const details = [
+            ["Coste", card.manaCost],
+            ["Tipo", card.type],
+            ["Tipos", card.types?.join(", ")],
+            ["Color(es)", card.colors?.join(", ")],
+            ["Edición", card.setName],
+            ["Texto", card.text]
+        ];
+
+        details.forEach(([label, value]) => {
+            if (!value) return;
+            const detail = document.createElement("p");
+            detail.className = label === "Texto" ? "card-text" : "";
+
+            if (label !== "Texto") {
+                const strong = document.createElement("strong");
+                strong.textContent = `${label}: `;
+                detail.append(strong);
+            }
+
+            detail.append(document.createTextNode(value));
+            body.append(detail);
+        });
+
+        cardElement.append(body);
+        cardsection.append(cardElement);
+    });
+}
+
+async function LoadCards() {
     try {
-        const res = await fetch(apiURL);
-        const data = await res.json();
+        const response = await fetch("https://api.magicthegathering.io/v1/cards");
+        if (!response.ok) {
+            throw new Error(`La API respondió con el estado ${response.status}.`);
+        }
 
-        // FILTRO: Nos quedamos solo con las cartas que tienen "imageUrl" 
-        // para evitar que salgan repetidas o sin imagen.
-        const cardsWithImages = data.cards.filter(card => card.imageUrl);
+        const data = await response.json();
+        if (!Array.isArray(data.cards)) {
+            throw new Error("La respuesta de la API no contiene una lista de cartas.");
+        }
 
-        return cardsWithImages;
+        const cardsByName = new Map();
+        data.cards.forEach(card => {
+            const key = card.name?.trim().toLocaleLowerCase();
+            if (key && !cardsByName.has(key)) {
+                cardsByName.set(key, card);
+            }
+        });
+
+        allCards = [...cardsByName.values()];
+        RenderCards(allCards);
     } catch (error) {
-        console.error("Error al obtener las cartas:", error);
-        return [];
+        cardsection.textContent = `No se pudieron cargar las cartas: ${error.message}`;
+        console.error(error);
     }
 }
 
-async function renderCards() {
-    const cards = await getCards();
-    let template = "";
-
-    cards.forEach((card) => {
-        const cardName = card.name || "Nombre desconocido";
-        const manaCost = card.manaCost ? card.manaCost : "Sin coste";
-        const text = card.text ? card.text : " ";
-        const colors = card.colors ? card.colors.join(", ") : "Incolora";
-        const type = card.type || (card.types ? card.types.join(" - ") : "Desconocido");
-        const types = card.types ? card.types.join(", ") : "Desconocido";
-        const setEdition = card.setName || "Edición desconocida";
-
-        template += `
-        <div class="card" style="width: 18rem;">
-            <img src="${card.imageUrl}" class="${cardName}" alt="${cardName}">
-            <div class="card-body">
-            <h5 class="card-title">${cardName}</h5>
-            <p><strong>Coste:</strong>${manaCost}</p>
-            <p><strong>Tipo:</strong> ${type}</p>
-            <p><strong>Tipos:</strong> ${types}</p>
-            <p><strong>Color(es):</strong> ${colors}</p>
-            <p><strong>Edición:</strong> ${setEdition}</p>
-            <p class="card-text">${text}</p>
-            <a href="#" class="btn btn-primary">Go somewhere</a>
-        </div>
-</div>
-        `;
-    });
-
-    cardsSection.innerHTML = template;
-}
-
-renderCards();
+select.addEventListener("change", () => RenderCards(allCards));
+LoadCards();
