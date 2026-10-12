@@ -1,27 +1,169 @@
+/* Registra la variante regular para poder usar Goudy Medieval aunque no esté instalada localmente. */
+@font-face {
+    font-family: "Goudy Medieval";
+    src: url("../font/goudy-medieval/Goudy%20Mediaeval%20Regular.ttf") format("truetype");
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}
+
+/* Registra la variante seminegrita para textos que usan peso 700. */
+@font-face {
+    font-family: "Goudy Medieval";
+    src: url("../font/goudy-medieval/Goudy%20Mediaeval%20DemiBold.ttf") format("truetype");
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+}
+
+/* Define alineación, márgenes internos, tipografía e imagen de fondo generales. */
 body {
     text-align: center;
     padding: 0px 40px;
+    font-family: "Goudy Medieval", serif;
+    background-image: url("../img/magic elements.jpg");
+    background-size: 100% 100vh;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
+/* Distribuye las cartas en una cuadrícula de cuatro columnas con espacios uniformes. */
 .cards {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    column-gap: 20px;
+    row-gap: 20px;
 }
 
+/* Da a cada carta apariencia de panel de piedra, con bordes redondeados y sombra. */
 .card {
-    background: black;
-    color: white;
+    position: relative;
+    font-family: "Goudy Medieval", serif;
+    background: linear-gradient(145deg, #7a7a7a23, #4d4d4d93);
+    color: #080000;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
 }
 
+/* Estiliza el área de texto de cada carta con un fondo claro semitransparente. */
+.card-body {
+    background: rgba(255, 255, 255, 0.495);
+    padding: 1rem;
+}
+
+/* Oculta y prepara la información para animarla cuando se interactúa con la carta. */
+.card--has-image .card-info {
+    position: absolute;
+    inset: 0;
+    max-height: 0;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.92);
+    opacity: 0;
+    transform: scale(0.95);
+    visibility: hidden;
+    pointer-events: none;
+    transition: all 0.4s ease-in-out;
+}
+
+/* Revela los datos al pasar el cursor, enfocar la imagen o activar la carta con un clic. */
+.card--has-image .card-image:hover + .card-info,
+.card--has-image .card-image:focus + .card-info,
+.card--has-image .card-info.show {
+    max-height: 300px;
+    overflow-y: auto;
+    opacity: 1;
+    transform: scale(1);
+    visibility: visible;
+    pointer-events: auto;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+
+/* En pantallas táctiles no existe hover, por lo que mantiene los datos visibles. */
+@media (hover: none) {
+    .card--has-image .card-info {
+        position: static;
+        max-height: none;
+        overflow-y: visible;
+        background: rgba(255, 255, 255, 0.495);
+        opacity: 1;
+        transform: none;
+        visibility: visible;
+        pointer-events: auto;
+        box-shadow: none;
+    }
+}
+
+/* Mantiene las imágenes de cartas en un ancho fijo y elimina el espacio en línea bajo ellas. */
 img {
     width: 18rem;
+    display: block;
 }
 
+/* Da formato al encabezado principal para que contraste con la imagen de fondo. */
 h1 {
     color: white;
-    font-family: 'Courier New', Courier, monospace;
     font-size: 50px;
     text-shadow: 2px 2px 4px #000000;
     text-align: center;
+}
+
+/* Centra el control de filtro y establece el contexto para posicionar su menú desplegable. */
+.filter {
+    position: relative;
+    width: 33.333%;
+    margin: 0 auto 20px;
+}
+
+/* Usa la tipografía personalizada en el botón del filtro y en la lista de opciones. */
+.filter-toggle,
+.filter-options,
+.filter-option {
+    font-family: "Goudy Medieval", serif;
+}
+
+/* Da al botón del filtro ancho completo, apariencia similar a Bootstrap y cursor interactivo. */
+.filter-toggle {
+    width: 100%;
+    padding: 0.375rem 2.25rem 0.375rem 0.75rem;
+    color: #212529;
+    text-align: left;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    cursor: pointer;
+}
+
+/* Posiciona la lista bajo el botón y la muestra sobre el contenido circundante. */
+.filter-options {
+    position: absolute;
+    z-index: 10;
+    width: 100%;
+    margin-top: 0.25rem;
+    padding: 0.25rem;
+    background: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Presenta cada categoría como una fila de ancho completo, alineada y sin borde nativo. */
+.filter-option {
+    display: block;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    color: #212529;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-radius: 0.25rem;
+}
+
+/* Resalta la opción bajo el puntero, enfocada por teclado o actualmente seleccionada. */
+.filter-option:hover,
+.filter-option:focus,
+.filter-option[aria-selected="true"] {
+    background: #e9ecef;
+    outline: none;
 }
